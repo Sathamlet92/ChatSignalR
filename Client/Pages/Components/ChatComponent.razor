@@ -1,5 +1,5 @@
-﻿@page "/chat/{IdContact:int}"
-@using BlazingChat.Shared;
+﻿@page "/chat/{IdContact:long}"
+@using BlazingChat.Shared.Models.DTOs;
 
 <h3>Mensajes @IdContact</h3>
 <section style="background-color: #eee;">
@@ -54,9 +54,31 @@
                                     </div>
                             </div>
                         </li>
+                        <li class="d-flex justify-content-between mb-4">
+                            <div class="card w-100">
+                                <div class="card-header d-flex justify-content-between p-3">
+                                    <p class="fw-bold mb-0">Lara Croft</p>
+                                    <p class="text-muted small mb-0"><i class="far fa-clock"></i> 13 mins ago</p>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0">
+                                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
+                                        laudantium.
+                                    </p>
+                                </div>
+                            </div>
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-5.webp" alt="avatar"
+                                    class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60">
+                        </li>
+                        <li class="bg-white mb-3">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" placeholder="Escribe tu mensaje" rows="3"></textarea>
+                                <button type="button" class="btn btn-danger rounded-pill float-end mb-4">Send</button>
+                            </div>
+                        </li>                        
                     </ul>                
                 }                    
-            </div> 
+            </div>            
         </div>
     </div>
 </section>
@@ -64,9 +86,9 @@
 @code {
 
     [Parameter]
-    public int IdContact { get; set; }
+    public long IdContact { get; set; }
     private bool _selectChat = false;
-    public List<Contact> ContactsList = new();
+    public List<ContactDto> ContactsList = new();
         
 
     protected override async Task OnInitializedAsync()
@@ -80,19 +102,19 @@
         }         
     }
 
-    private async IAsyncEnumerable<Contact> GetContacts()
+    private async IAsyncEnumerable<ContactDto> GetContacts()
     {
-        for (int i = 1; i <= 30; i++)
+        for (int i = 1; i <= 15; i++)
         {            
             yield return await ProduceContact(i);
             this.StateHasChanged();
         }
     }
 
-    private async Task<Contact> ProduceContact(int id)
+    private async Task<ContactDto> ProduceContact(int id)
     {
         await Task.Delay(127);
-        return new Contact 
+        return new ContactDto 
         {
             ContactId = id,
             FirstName = "Juanito" + id,

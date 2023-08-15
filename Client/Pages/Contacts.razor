@@ -1,6 +1,8 @@
 ﻿@page "/contacts"
-@using BlazingChat.Shared;
+@using BlazingChat.Shared.Models.DTOs;
+@using BlazingChat.Client.ViewsModels;
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
 
 <PageTitle>Contactos</PageTitle>
 
@@ -26,8 +28,8 @@
             @foreach (var contact in string.IsNullOrEmpty(_filter) ?_contactsList : _contactsList.Where(c => c.FirstName.Contains(_filter) || c.LastName.Contains(_filter) || c.Phone!.Contains(_filter)))
             {
                 <tr style="cursor: pointer;" @onclick="(e) => NavigateToChat(contact.ContactId)">                                       
-                    <td>@contact.FirstName <span> </span> @contact.LastMessage</td>
-                    <td>@contact.LastName <span> </span> @contact.LastSecondName</td>
+                    <td>@contact.FirstName</td>
+                    <td>@contact.LastName</td>
                     <td>@contact.Phone</td>
                     <td>@contact.Email</td>
                 </tr>
@@ -42,7 +44,7 @@
     private bool _selectChat = false;
     private string _activeClass = string.Empty;
 
-    private List<Contact> _contactsList = new();
+    private List<ContactView> _contactsList = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -52,32 +54,33 @@
             _contactsList.Add(item);          
         }     
     }
-    private async IAsyncEnumerable<Contact> GetContacts()
+    private async IAsyncEnumerable<ContactView> GetContacts()
     {
-        for (int i = 1; i <= 100; i++)
-        {            
-            yield return await ProduceContact(i);
+        var resultReq = await Http.GetFromJsonAsync<List<ContactDto>>("api/user/contacts/1");
+
+        foreach (var contact in resultReq!)
+        {
+            yield return await ProduceContact(contact);
             this.StateHasChanged();
-        }
+            
+        }        
+            
     }
 
-    private async Task<Contact> ProduceContact(int id)
+    private async Task<ContactView> ProduceContact(ContactDto contact)
     {
         await Task.Delay(27);
-        return new Contact 
+        return new ContactView 
         {
-            ContactId = id,
-            FirstName = "Juanito" + id.ToString("00"),
-            LastName = "Calabaza",
-            Email = $"somemail{id.ToString("00")}@email.com"
+            ContactId = contact.ContactId,
+            FirstName = $"{contact.FirstName} {contact.SecondName}",
+            LastName = $"{contact.LastName} {contact.LastSecondName}",
+            Email = contact.Email!,
+            Phone = $"{contact.AreaCode} {contact.Phone}"
         };
     }
-    private void ChangeClassList(MouseEventArgs e, Contact contact)
-    {
-        _contactsList.Find(c => c.Equals(contact))!.ActiveClass = "active";
-    }
-    
-    private void NavigateToChat(int id)
+
+    private void NavigateToChat(long id)
     {
         NavigationManager.NavigateTo($"/chat/{id}");
     }

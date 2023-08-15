@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BlazingChat.Shared;
+namespace BlazingChat.Shared.Models.DTOs;
 
-public class Contact
+public class ContactDto
 {
-    public int ContactId { get; set; }
+    public long ContactId { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string? SecondName { get; set; }
     public string LastName { get; set; } = string.Empty;
@@ -19,12 +19,12 @@ public class Contact
     public string NumNoReadMessages {get; set;} = string.Empty;
     public string ActiveClass = string.Empty;
 
-    public Contact()
+    public ContactDto()
     {
         
     }
 
-    public Contact(int contactId, string firstName, string lastName)
+    public ContactDto(int contactId, string firstName, string lastName)
     {
         ContactId = contactId;
         FirstName = firstName;
