@@ -1,9 +1,42 @@
 ﻿@page "/"
+@using BlazingChat.Client.ViewsModels
+@using BlazingChat.Shared.Models.DTOs
+@using AutoMapper
+@inject HttpClient HttpClient
 
-<PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="col-12">
+    <input type="text" @bind-value="_profileViewModel.FirstName" class="form-control" placeholder="Nombre(s)">
+    <br/>
+    <input type="text" @bind-value="_profileViewModel.SecondName" class="form-control" placeholder="Segundo nombre (opcional)">
+    <br/>
+    <input type="text" @bind-value="_profileViewModel.LastName" class="form-control" placeholder="Primer apellido">
+    <br/>
+    <input type="text" @bind-value="_profileViewModel.SecondLastName" class="form-control" placeholder="Segundo apellido (opcional)">
+    <br/>
+    <input type="text" @bind-value="_profileViewModel.EmailAddress" class="form-control" placeholder="Correo electronico">
+    <br/>
+    <input type="text" @bind-value="_profileViewModel.Phone" class="form-control" placeholder="Teléfono">
+    <br/>
+    <button class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfils</button>
+    <button class="btn btn-primary" @onclick="GetProfile">Ver perfil</button>
+    <span>&nbsp;&nbsp;</span>@(_profileViewModel.Message ?? string.Empty)
+</div>
+@code {
 
-Hello word!
+    [Inject]
+    public IMapper? Mapper { get; set; }
+    private ProfileView _profileViewModel = new ProfileView();
+    
+    private async Task UpdateProfile()
+    {
+       
+    }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    private async Task GetProfile()
+    {
+        var response = await HttpClient.GetFromJsonAsync<UserDto>("api/User/getprofile/1");
+
+        _profileViewModel =  Mapper!.Map<ProfileView>(response);
+    }
+}
