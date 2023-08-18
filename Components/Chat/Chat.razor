@@ -1,0 +1,28 @@
+﻿@page "/chat/{IdContact:long}"
+@using BlazingChat.Components.Card
+@using BlazingChat.Components.Message
+<h3>Mensajes @IdContact</h3>
+<section style="background-color: #eee;">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+                <h5 class="font-weight-bold mb-3 text-center text-lg-start">Member</h5>
+                @foreach (var contact in _contactList)
+                {
+                    <CardProfile Contact="contact"/>                    
+                }                
+            </div>
+            <div class="col-md-6 col-lg-7 col-xl-8">
+                @if(true)
+                {
+                    <MessageChat/>
+
+                    <div class="mb-3">
+                        <textarea class="form-control" id="exampleFormControlTextarea1" placeholder="Escribe tu mensaje" rows="3"></textarea>
+                        <button type="button" class="btn btn-danger rounded-pill float-end mb-4">Send</button>
+                    </div>              
+                }                    
+            </div>            
+        </div>
+    </div>
+</section>

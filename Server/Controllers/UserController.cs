@@ -3,6 +3,7 @@ using BlazingChat.Server.Models.Entities;
 using BlazingChat.Server.Context;
 using Microsoft.EntityFrameworkCore;
 using BlazingChat.Shared.Models.DTOs;
+using BlazingChat.Shared.Models.Reponse;
 
 namespace BlazingChat.Server.Controllers;
 [Route("api/[controller]")]
@@ -23,30 +24,44 @@ public class UserController : ControllerBase
         }
     }
     [HttpGet("contacts/{idUser}")]
-    public async Task<List<ContactDto>> GetContactsAsync(long idUser)
+    public async Task<List<ContactDto>> GetContactsAsync(long idUser, [FromQuery]bool hasConversation)
     {
         using (var context = await _factoryContext.CreateDbContextAsync())
-        {    
-            var some1 = await context.Contacts!.ToListAsync();
-            var some =  await context.Contacts!.Where(con => con.PrincipalUserId.Equals(idUser)).ToListAsync();
-            return await context.Contacts!.Where(con => con.PrincipalUserId.Equals(idUser))
-                .Include(con => con.ContactUser)
-                .Include(c => c.ContactUser.Emails)
-                .Include(c => c.ContactUser.Phones).
-                Select(c => new ContactDto
-                {
-                    FirstName = c.ContactName,
-                    SecondName = c.ContactUser.SecondName,
-                    LastName = c.ContactUser.LastName!,
-                    Phone = c.ContactUser.Phones.FirstOrDefault(p => p.UserId == c.ContactUser.UserId)!.Phone1,
-                    LastSecondName = c.ContactUser.SecondName,
-                    Email = c.ContactUser.Emails.FirstOrDefault(e => e.HasPrincipal!.Value)!.EmailAddress
-                }).ToListAsync();  
+        {
+            return ! hasConversation 
+                ? await context.Contacts!.Where(con => con.PrincipalUserId.Equals(idUser))
+                    .Include(con => con.ContactUser)
+                    .Include(c => c.ContactUser.Emails)
+                    .Include(c => c.ContactUser.Phones).
+                    Select(c => new ContactDto
+                    {
+                        ContactId = c.ContactId,
+                        FirstName = c.ContactName,
+                        SecondName = c.ContactUser.SecondName,
+                        LastName = c.ContactUser.LastName!,
+                        Phone = c.ContactUser.Phones.FirstOrDefault(p => p.UserId == c.ContactUser.UserId)!.Phone1,
+                        LastSecondName = c.ContactUser.SecondName,
+                        Email = c.ContactUser.Emails.FirstOrDefault(e => e.HasPrincipal!.Value)!.EmailAddress
+                    }).ToListAsync() 
+                : await context.Contacts!.Where(con => con.PrincipalUserId.Equals(idUser) && con.HasConversation)
+                    .Include(con => con.ContactUser)
+                    .Include(c => c.ContactUser.Emails)
+                    .Include(c => c.ContactUser.Phones).
+                    Select(c => new ContactDto
+                    {
+                        ContactId = c.ContactId,
+                        FirstName = c.ContactName,
+                        SecondName = c.ContactUser.SecondName,
+                        LastName = c.ContactUser.LastName!,
+                        Phone = c.ContactUser.Phones.FirstOrDefault(p => p.UserId == c.ContactUser.UserId)!.Phone1,
+                        LastSecondName = c.ContactUser.SecondName,
+                        Email = c.ContactUser.Emails.FirstOrDefault(e => e.HasPrincipal!.Value)!.EmailAddress
+                    }).ToListAsync();  
         }            
     }
 
     [HttpPut]
-    public async Task<UserDto> UpdateUser(UserDto user)
+    public async Task<ResponseOut<UserDto>> UpdateUser(UserDto user)
     {
         using (var context = await _factoryContext.CreateDbContextAsync())
         {
@@ -59,9 +74,10 @@ public class UserController : ControllerBase
             entity.ProfilePictureUrl = user.ProfilePictureUrl ?? entity.ProfilePictureUrl;
             entity.Emails.FirstOrDefault(e => e.UserId.Equals(entity.UserId) && e.HasPrincipal!.Value)!.EmailAddress = user.EmailAddress ?? entity.Emails.FirstOrDefault(e => e.UserId.Equals(entity.UserId))!.EmailAddress;
             entity.Phones.FirstOrDefault(e => e.UserId.Equals(entity.UserId))!.Phone1 = user.Phone ?? entity.Phones.FirstOrDefault(e => e.UserId.Equals(entity.UserId))!.Phone1;
-            context.Update(entity);
-            await context.SaveChangesAsync();
-            return user;
+            var result = await context.SaveChangesAsync();
+            var flag = result > 0;
+            await Task.FromResult(entity);
+            return ResponseOut<UserDto>.CreateResponse(flag, flag ? "Actualizado correctamente" : "No se pudo actualizar", user);
         }   
     }
 
