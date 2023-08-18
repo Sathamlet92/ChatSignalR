@@ -1,42 +1,35 @@
 ﻿@page "/"
-@using BlazingChat.Client.ViewsModels
-@using BlazingChat.Shared.Models.DTOs
-@using AutoMapper
-@inject HttpClient HttpClient
+@using BlazingChat.Service.ViewsModels
+@inject IProfileVM _profile
+
+<EditForm class="col-12" Model="@_profile">
+    <DataAnnotationsValidator />
+    <InputText @bind-Value="@_profile.FirstName" class="form-control" placeholder="Nombre(s)"/>
+    <ValidationMessage For="@(() => _profile.FirstName)"/>
+    <br/>
+    <InputText @bind-Value="@_profile.SecondName" class="form-control" placeholder="Segundo nombre (opcional)"/>
+    <br/>
+    <InputText @bind-Value="@_profile.LastName" class="form-control" placeholder="Primer apellido"/>
+    <ValidationMessage For="@(() => _profile.LastName)"/>
+    <br/>
+    <InputText @bind-Value="@_profile.SecondLastName" class="form-control" placeholder="Segundo apellido (opcional)"/>
+    <br/>
+    <InputText @bind-Value="@_profile.EmailAddress" class="form-control" placeholder="Correo electronico"/>
+    <ValidationMessage For="@(() => _profile.EmailAddress)"/>
+    <br/>
+    <InputText @bind-Value="@_profile.Phone" class="form-control" placeholder="Teléfono"/>
+    <ValidationMessage For="@(() => _profile.Phone)"/>
+    <br/>
+    <button disabled="@(!context.Validate())" type="submit" class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfils</button>
+    <button type="button" class="btn btn-primary" @onclick="GetProfile">Ver perfil</button>
+    <span>&nbsp;&nbsp;</span>@(_profile.Message ?? string.Empty)
+</EditForm>
 
 
-<div class="col-12">
-    <input type="text" @bind-value="_profileViewModel.FirstName" class="form-control" placeholder="Nombre(s)">
-    <br/>
-    <input type="text" @bind-value="_profileViewModel.SecondName" class="form-control" placeholder="Segundo nombre (opcional)">
-    <br/>
-    <input type="text" @bind-value="_profileViewModel.LastName" class="form-control" placeholder="Primer apellido">
-    <br/>
-    <input type="text" @bind-value="_profileViewModel.SecondLastName" class="form-control" placeholder="Segundo apellido (opcional)">
-    <br/>
-    <input type="text" @bind-value="_profileViewModel.EmailAddress" class="form-control" placeholder="Correo electronico">
-    <br/>
-    <input type="text" @bind-value="_profileViewModel.Phone" class="form-control" placeholder="Teléfono">
-    <br/>
-    <button class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfils</button>
-    <button class="btn btn-primary" @onclick="GetProfile">Ver perfil</button>
-    <span>&nbsp;&nbsp;</span>@(_profileViewModel.Message ?? string.Empty)
-</div>
-@code {
+@code {    
+    protected override async Task OnInitializedAsync() => await _profile.GetProfile();
 
-    [Inject]
-    public IMapper? Mapper { get; set; }
-    private ProfileView _profileViewModel = new ProfileView();
-    
-    private async Task UpdateProfile()
-    {
-       
-    }
+    private async Task UpdateProfile() => await _profile.UpdateProfile(_profile);
 
-    private async Task GetProfile()
-    {
-        var response = await HttpClient.GetFromJsonAsync<UserDto>("api/User/getprofile/1");
-
-        _profileViewModel =  Mapper!.Map<ProfileView>(response);
-    }
+    private async Task GetProfile() => await _profile.GetProfile();
 }

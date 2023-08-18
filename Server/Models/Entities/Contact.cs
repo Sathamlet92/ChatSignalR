@@ -15,7 +15,7 @@ public partial class Contact
 
     public long ContactUserId { get; set; }
 
-    public byte[] HasConversation { get; set; } = null!;
+    public bool HasConversation { get; set; }
 
     public virtual User ContactUser { get; set; } = null!;
 
