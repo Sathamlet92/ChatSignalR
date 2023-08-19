@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlazingChat.Server.Models.Entities;
+namespace BlazingChat.Domain.Models.Entites;
 
 public partial class User
 {
@@ -17,7 +17,7 @@ public partial class User
 
     public string? ProfilePictureUrl { get; set; }
 
-    public byte[]? DateOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     public string? AboutMe { get; set; }
 
@@ -25,7 +25,7 @@ public partial class User
 
     public bool DarkTheme { get; set; }
 
-    public byte[]? CreatedDate { get; set; }
+    public DateOnly? CreatedDate { get; set; }
 
     public virtual ICollection<Contact> ContactContactUsers { get; set; } = new List<Contact>();
 

@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Client\BlazingChat.Client.csproj" />
     <ProjectReference Include="..\Shared\BlazingChat.Shared.csproj" />
     <ProjectReference Include="..\Service\BlazingChat.Service.csproj" />
+    <ProjectReference Include="..\Domain\BlazingChat.Domain.csproj" />
   </ItemGroup>
 
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlazingChat.Server.Models.Entities;
+namespace BlazingChat.Domain.Models.Entites;
 
 public partial class Email
 {
@@ -9,7 +9,7 @@ public partial class Email
 
     public string EmailAddress { get; set; } = null!;
 
-    public bool? HasPrincipal { get; set; } = null!;
+    public bool? HasPrincipal { get; set; }
 
     public long UserId { get; set; }
 

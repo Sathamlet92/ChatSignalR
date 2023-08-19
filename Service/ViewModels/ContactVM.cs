@@ -10,6 +10,7 @@ public class ContactVM : IContactVM
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public string  AreaCode  { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string LastMessage { get; set; } = string.Empty;
     private readonly HttpClient? _client;
@@ -31,10 +32,5 @@ public class ContactVM : IContactVM
         {
             yield return _mapper!.Map<IContactVM>(contact);           
         }            
-    }
-
-    public IAsyncEnumerable<IContactVM> GetContactsChatting()
-    {
-        throw new NotImplementedException();
     }
 }

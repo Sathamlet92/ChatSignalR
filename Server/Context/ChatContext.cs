@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using BlazingChat.Server.Models.Entities;
+﻿using BlazingChat.Domain.Models.Entites;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazingChat.Server.Context;
@@ -57,10 +55,12 @@ public partial class ChatContext : DbContext
             entity.Property(e => e.PrincipalUserId).HasColumnName("principal_user_id");
 
             entity.HasOne(d => d.ContactUser).WithMany(p => p.ContactContactUsers)
+                .IsRequired()
                 .HasForeignKey(d => d.ContactUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
             entity.HasOne(d => d.PrincipalUser).WithMany(p => p.ContactPrincipalUsers)
+                .IsRequired()
                 .HasForeignKey(d => d.PrincipalUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
@@ -123,7 +123,7 @@ public partial class ChatContext : DbContext
 
             entity.Property(e => e.PhoneId).HasColumnName("phone_id");
             entity.Property(e => e.AreaCode).HasColumnName("area_code");
-            entity.Property(e => e.Phone1).HasColumnName("phone");
+            entity.Property(e => e.Tel).HasColumnName("phone");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.AreaCodeNavigation).WithMany(p => p.Phones)

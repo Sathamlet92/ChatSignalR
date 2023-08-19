@@ -9,11 +9,9 @@ public class ContactDto
     public string? SecondName { get; set; }
     public string LastName { get; set; } = string.Empty;
     public string? LastSecondName { get; set; } 
-    [Phone]
-    public string Phone { get; set; } = string.Empty;
-    public string? AreaCode { get; set; }
-    [Required, EmailAddress]
-    public string? Email { get; set; }
+    
+    public List<PhoneDto> Phones { get; set; }
+    public List<EmailDto> Emails { get; set; }
 
     public string LastMessage { get; set; } = string.Empty;
     public string NumNoReadMessages {get; set;} = string.Empty;
@@ -21,10 +19,11 @@ public class ContactDto
 
     public ContactDto()
     {
-        
+        Phones = new();
+        Emails = new();    
     }
 
-    public ContactDto(int contactId, string firstName, string lastName)
+    public ContactDto(int contactId, string firstName, string lastName) : this()
     {
         ContactId = contactId;
         FirstName = firstName;

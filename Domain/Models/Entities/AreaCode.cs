@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
-namespace BlazingChat.Server.Models.Entities;
+namespace BlazingChat.Domain.Models.Entites;
 
 public partial class AreaCode
 {

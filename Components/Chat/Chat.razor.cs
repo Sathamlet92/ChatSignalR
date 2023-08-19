@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using BlazingChat.Service.ViewsModels;
-using BlazingChat.Shared.Models.DTOs;
+﻿using BlazingChat.Service.ViewsModels;
 using Microsoft.AspNetCore.Components;
 namespace BlazingChat.Components.Chat;
 
@@ -10,17 +8,17 @@ public partial class Chat
     public long IdContact { get; set; }
     private List<IContactVM> _contactList;
 
-    private readonly IContactVM _contact;
+    [Inject]
+    public IContactVM? Contact {get;set;}
 
-    public Chat(IContactVM contact)
+    public Chat()
     {
-        _contact = contact;
         _contactList = new();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        await foreach (var contact in _contact.GetContacts())
+        await foreach (var contact in Contact!.GetContacts())
         {
             _contactList.Add(contact);
             StateHasChanged();

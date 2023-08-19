@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using BlazingChat.Server.Context;
+using BlazingChat.Service.Mappings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -14,7 +15,12 @@ builder.Services.AddSwaggerGen(opt =>
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(cfn => 
+{
+    cfn.AddProfile<ContactProfile>();
+    cfn.AddProfile<UserProfile>();
+    cfn.AddProfile<SettingsProfile>();
+});
 
 var parentDir = Environment.CurrentDirectory;
 var connectionString = string.Format(builder.Configuration.GetConnectionString("BlazingChat")!, parentDir.Replace("server", "Server"));
