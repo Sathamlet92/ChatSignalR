@@ -16,12 +16,12 @@ public partial class Chat
         _contactList = new();
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await foreach (var contact in Contact!.GetContacts())
-        {
-            _contactList.Add(contact);
-            StateHasChanged();
-        }    
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await foreach (var contact in Contact!.GetContacts())
+    //     {
+    //         _contactList.Add(contact);
+    //         StateHasChanged();
+    //     }    
+    // }
 }

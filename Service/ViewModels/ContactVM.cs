@@ -24,9 +24,9 @@ public class ContactVM : IContactVM
         _client = client;
         _mapper = mapper;
     }
-    public async IAsyncEnumerable<IContactVM> GetContacts()
+    public async IAsyncEnumerable<IContactVM> GetContacts(long idUser)
     {
-        var resultReq = await _client!.GetFromJsonAsync<List<ContactDto>>("api/user/contacts/1");
+        var resultReq = await _client!.GetFromJsonAsync<List<ContactDto>>($"api/user/contacts/{idUser}");
 
         foreach (var contact in resultReq!)
         {

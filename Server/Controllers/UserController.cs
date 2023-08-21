@@ -6,10 +6,15 @@ using BlazingChat.Shared.Models.Reponse;
 using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using BlazingChat.Domain.Models.Entites;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace BlazingChat.Server.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+
 public class UserController : ControllerBase
 {
     private readonly IDbContextFactory<ChatContext> _factoryContext;
@@ -19,6 +24,56 @@ public class UserController : ControllerBase
         _mapper = mapper;
         _factoryContext = factoryContext;
     }
+
+    [HttpPost("login")]
+    public async Task<ResponseOut<LoginDto>> Login(LoginDto user)
+    {
+        using(var context = await _factoryContext.CreateDbContextAsync())
+        {
+            var loggedUserIn = await context.Users!
+                .Join(context.Logins!, u => u.UserId, l => l.UserId, (u, l) => new {User = u, Login = l })
+                .Where(l => (l.Login.EmailAddres.Equals(user.User) || l.Login.UserName.Equals(user.User)) && l.Login.Password.Equals(user.Password))
+                .FirstOrDefaultAsync();
+            if(loggedUserIn is not null && loggedUserIn.User is not null)
+            {
+                var claims = new[] 
+                {
+                    new Claim(ClaimTypes.Name, loggedUserIn.Login.UserName),
+                    new Claim(ClaimTypes.Email, loggedUserIn.Login.EmailAddres)
+                };
+                var claimsIdentity = new ClaimsIdentity(claims, "serverAuth");
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                await HttpContext.SignInAsync(claimsPrincipal);
+            }
+            return ResponseOut<LoginDto>.CreateResponse(loggedUserIn is not null, loggedUserIn is not null? "Inicio de sesión satisfactorio" : "El nombre de usuario/correo electronico o contraseñá son incorrectos" );
+        }
+    }
+
+    [HttpGet("logoutuser")]
+    public async Task<ActionResult<ResponseOut<string>>> LogOutUser()
+    {
+        await HttpContext.SignOutAsync();
+        return Ok(ResponseOut<string>.CreateResponse(true, "Sesión cerrada exitosamente", null));
+    }
+
+    [HttpGet("getcurrentuser")]
+    public async Task<ResponseOut<UserDto>> GetCurrentUser()
+    {
+        if(User.Identity!.IsAuthenticated)
+        {
+            using (var context = await _factoryContext.CreateDbContextAsync())
+            {
+                var currentUser = await context.Logins!
+                    .Include(l => l.User)
+                    .Where(l => l.EmailAddres.Equals(User.FindFirstValue(ClaimTypes.Email)) || l.UserName.Equals(ClaimTypes.Name))
+                    .Select(l => l.User)
+                    .ProjectTo<UserDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                return ResponseOut<UserDto>.CreateResponse(true, "Recuperado satisfactoriamente", currentUser);
+            }
+        }
+        return ResponseOut<UserDto>.CreateResponse(false, "Sin usuario autenticado", null);
+    }
+
     [HttpGet("user")]
     public async Task<List<User>> GetUsersAsync()
     {
@@ -51,9 +106,8 @@ public class UserController : ControllerBase
             var entity = await context.Users!.Include(u => u.Emails).Include(u => u.Phones).FirstOrDefaultAsync(u => u.UserId.Equals(user.UserId));
             entity = _mapper.Map(user, entity);
             var result = await context.SaveChangesAsync();
-            var flag = result > 0;
             await Task.FromResult(entity);
-            return ResponseOut<UserDto>.CreateResponse(flag, flag ? "Actualizado correctamente" : "No se pudo actualizar", user);
+            return ResponseOut<UserDto>.CreateResponse(true, "Actualizado correctamente", user);
         }   
     }
 
@@ -62,20 +116,11 @@ public class UserController : ControllerBase
     {
         using (var context = await _factoryContext.CreateDbContextAsync())
         {
-            return context.Users!.Include(u => u.Emails).Include(u => u.Phones).Where(u => u.UserId.Equals(idUser)).Select(u => new UserDto
-            {
-                UserId =  u.UserId,
-                AboutMe = u.AboutMe,
-                ProfilePictureUrl = u.ProfilePictureUrl,
-                FirstName = u.FirstName,
-                SecondName = u.SecondName,
-                LastName = u.LastName!.Split()[0],
-                SecondLastName = u.LastName!.Split().Count() > 1 ? u.LastName!.Split()[1] : null,
-                Phone = u.Phones.FirstOrDefault(p => p.UserId == u.UserId)!.Tel,
-                EmailAddress = u.Emails.FirstOrDefault(e => e.HasPrincipal!.Value)!.EmailAddress,
-                Message = "Información recuperada correctamente"
-
-            }).First();
+            return await context.Users!.Where(u => u.UserId.Equals(idUser))
+                .Include(u => u.Phones)
+                .Include(u => u.Emails)
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                .FirstAsync();
         }        
     }
 
@@ -88,7 +133,7 @@ public class UserController : ControllerBase
         }
     }
 
-    [HttpPut("getsettings/{idUser}")]
+    [HttpPut("updatesettings/{idUser}")]
     public async Task<SettingsDto> UpdateSettingsAsync(long idUser, SettingsDto settings)
     {
         using(var context = await _factoryContext.CreateDbContextAsync())
@@ -97,6 +142,40 @@ public class UserController : ControllerBase
             await Task.FromResult(user);
             return settings;
         }
+    }
+
+    [HttpGet("getareacodes")]
+    public async Task<ResponseOut<List<string>>> GetAreaCodesAsync()
+    {
+        using(var context = await _factoryContext.CreateDbContextAsync())
+        {
+            var res = await context.AreaCodes!.Select(a => a.CodeNum).ToListAsync();
+            return ResponseOut<List<string>>.CreateResponse(res.Any(), "Información recuperada con exito", res);
+        }        
+    }
+    [HttpGet("updatenotificaction")]
+    public async Task<ResponseOut<UserDto>> UpdateNotification(long userId, bool hasNotification)
+    {
+        using (var context = await _factoryContext.CreateDbContextAsync())
+        {
+            var user = await context.Users!
+                .FirstAsync(u => u.UserId.Equals(userId));
+            user.Notifications = hasNotification;
+            await context.SaveChangesAsync();
+            await Task.FromResult(user);
+            return ResponseOut<UserDto>.CreateResponse(true, "Actulizado con exito", _mapper.Map(user, new UserDto()));
+        }
+    }
+    [HttpGet("facebooksignin")]
+    public async Task FacebookSignin()
+    {
+        await HttpContext.ChallengeAsync(FacebookDefaults.AuthenticationScheme, new AuthenticationProperties {RedirectUri = "/profile"});
+    }
+
+    [HttpGet("googlesignin")]
+    public async Task GoogleSignin()
+    {
+        await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties {RedirectUri = "/profile"});
     }
 }
 

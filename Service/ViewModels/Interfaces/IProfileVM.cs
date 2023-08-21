@@ -15,7 +15,9 @@ public interface IProfileVM
     [Required]
     public string Phone { get; set; }
     public string? Message { get; set; }
+    public List<AreaCodeVM>? AreaCodes { get; set; }
 
     public Task UpdateProfile(IProfileVM model);
-    public Task GetProfile();
+    public Task GetProfile(long userId);
+    public IAsyncEnumerable<string> GetAreaCodes();
 }

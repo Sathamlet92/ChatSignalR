@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager _navigation
+@inject HttpClient _client
 
 <div class="page">
     <div class="sidebar">
@@ -6,12 +8,42 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+        <AuthorizeView>
+        <Authorized>
+            <div class="top-row px-4">        
+                <h6 class="mx-2">Bienvenido: @context.User.Identity!.Name</h6>
+                <button class="btn btn-danger mx-2" @onclick="LogoutUser">Cerrar sesión</button>
+            </div> 
+        </Authorized>
+        <NotAuthorized>
+            <div class="top-row px-4">
+                <button class="btn btn-danger mx-2" @onclick="LogInUser">Crear cuenta</button>
+                <button class="btn btn-primary mx-2" @onclick="LogInUser">Iniciar sesión</button>                
+            </div> 
+        </NotAuthorized> 
+        </AuthorizeView>
+        <div class="content px-4"> 
+            @Body     
+        </div>              
     </main>
+    
 </div>
+
+
+
+
+
+
+
+@code
+{
+    private async Task LogoutUser()
+    {
+        await _client.GetAsync("api/user/logoutuser");
+        _navigation.NavigateTo("/", true);
+    }
+    private void LogInUser()
+    {
+        _navigation.NavigateTo("/", true);
+    }
+}

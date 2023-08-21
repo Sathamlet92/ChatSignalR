@@ -1,13 +1,15 @@
 using System.Text.Json.Serialization;
 using BlazingChat.Server.Context;
 using BlazingChat.Service.Mappings;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json");
 builder.Services.AddControllersWithViews().AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddRazorPages();
 builder.Services.AddSwaggerGen(opt => 
@@ -25,6 +27,20 @@ builder.Services.AddAutoMapper(cfn =>
 var parentDir = Environment.CurrentDirectory;
 var connectionString = string.Format(builder.Configuration.GetConnectionString("BlazingChat")!, parentDir.Replace("server", "Server"));
 builder.Services.AddDbContextFactory<ChatContext>(opt => opt.UseSqlite(connectionString));
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+}).AddCookie()
+.AddFacebook(fo => 
+{ 
+    fo.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
+    fo.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+})
+.AddGoogle(go => 
+{
+    go.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    go.ClientSecret =   builder.Configuration["Authentication:Google:ClientSecret"]!;
+}); 
 var app = builder.Build();
 
 
@@ -47,6 +63,7 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();
 
 
 app.MapRazorPages();

@@ -1,4 +1,4 @@
-﻿namespace BlazingChat.Shared;
+﻿namespace BlazingChat.Shared.Models.DTOs;
 
 public class LoginDto
 {

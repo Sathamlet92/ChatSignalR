@@ -1,6 +1,9 @@
 ﻿@page "/contacts"
+@attribute [Authorize]
 @using BlazingChat.Service.ViewsModels;
+@using System.Security.Claims
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider _auth
 @inject IContactVM _contactVM
 
 <PageTitle>Contactos</PageTitle>
@@ -48,11 +51,18 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await foreach (var item in _contactVM.GetContacts())
+        var authUser = await _auth.GetAuthenticationStateAsync();
+        var user = authUser.User;
+        if(user.Identity != null && user.Identity.IsAuthenticated)
         {
-            _contactsList.Add(item);
-            this.StateHasChanged();          
-        }     
+            var claim = user.FindFirst(c => c.Type.Equals(ClaimTypes.NameIdentifier));
+            await foreach (var item in _contactVM.GetContacts(Convert.ToInt64(claim!.Value)))
+            {
+                _contactsList.Add(item);
+                this.StateHasChanged();          
+            }  
+        }
+           
     }
     
 
