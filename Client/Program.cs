@@ -14,6 +14,7 @@ builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddSingleton(builder.HostEnvironment);
 
+
 builder.Services.AddAutoMapper(cfn => 
 {
     cfn.AddProfile<ContactProfile>();

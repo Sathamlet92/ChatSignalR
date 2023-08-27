@@ -3,10 +3,6 @@ using System.Net.Http.Json;
 using AutoMapper;
 using BlazingChat.Shared.Models.DTOs;
 using BlazingChat.Shared.Models.Reponse;
-using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using Google.Apis.Auth.OAuth2;
-using Google.Cloud.Storage.V1;
 using Newtonsoft.Json;
 
 namespace BlazingChat.Service.ViewsModels;

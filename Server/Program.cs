@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using BlazingChat.Client.Models.Configs;
 using BlazingChat.Server.Context;
 using BlazingChat.Service.Mappings;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -6,6 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(opt => 
+{
+    opt.Limits.MaxRequestBodySize = builder.Configuration.GetValue<long>("Kestrel:Limits:MaxRequestBodySize");    
+});
 
 // Add services to the container.
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json");
@@ -15,6 +21,8 @@ builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
+
+builder.Services.Configure<Firebase>(builder.Configuration.GetSection("Firebase"));
 
 builder.Services.AddAutoMapper(cfn => 
 {
