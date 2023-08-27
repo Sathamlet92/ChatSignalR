@@ -1,47 +1,27 @@
 ﻿@page "/settings"
+@attribute [Authorize]
 @using BlazingChat.Shared
-@inject HttpClient Http
+@inject ISettingsVM _settings
 
-<PageTitle>Weather forecast</PageTitle>
 
-<h1>Weather forecast</h1>
+<h2><b>Settings</b></h2> 
+<hr />
 
-<p>This component demonstrates fetching data from the server.</p>
+<div class="col-12">
+    <input type="checkbox" @bind="@_settings.Notifications" id="chkNotification">
+    <label> Notification </label>    
+    <br>   
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <input type="checkbox" @bind="@_settings.DarkTheme" id="chkDarkTheme">
+    <label> Dark Theme </label>    
+    <br>
+</div>
+<div class="col-12">
+    <button class="btn btn-primary" @onclick="_settings.Save">Save</button>
+</div>
 
 @code {
     private WeatherForecast[]? forecasts;
 
-    protected override async Task OnInitializedAsync()
-    {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
-    }
+    protected override async Task OnInitializedAsync() => await _settings.GetSettings();
 }

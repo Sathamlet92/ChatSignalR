@@ -3,6 +3,7 @@
 public class UserDto
 {
     public long UserId { get; set; }
+    public string? UserName {get; set;}
     public string FirstName { get; set; } = string.Empty;
     public string? SecondName {get; set;}
     public string LastName { get; set; } = string.Empty;
@@ -12,4 +13,5 @@ public class UserDto
     public string? Message { get; set; }
     public string? ProfilePictureUrl { get; set; }
     public string?  AboutMe { get; set; }
+    public string? UrlImageProfile { get; set; }
 }

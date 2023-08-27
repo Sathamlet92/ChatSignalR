@@ -7,5 +7,5 @@ public interface IContactVM
     public string Email { get; set; } 
     public string? Phone { get; set; }
     public string  LastMessage { get; set; }  
-    public IAsyncEnumerable<IContactVM> GetContacts();
+    public IAsyncEnumerable<IContactVM> GetContacts(long idUser);
 }

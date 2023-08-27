@@ -1,35 +1,143 @@
-﻿@page "/"
+﻿@page "/profile"
+@attribute [Authorize]
 @using BlazingChat.Service.ViewsModels
+@using System.Security.Claims
 @inject IProfileVM _profile
-
-<EditForm class="col-12" Model="@_profile">
-    <DataAnnotationsValidator />
-    <InputText @bind-Value="@_profile.FirstName" class="form-control" placeholder="Nombre(s)"/>
-    <ValidationMessage For="@(() => _profile.FirstName)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.SecondName" class="form-control" placeholder="Segundo nombre (opcional)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.LastName" class="form-control" placeholder="Primer apellido"/>
-    <ValidationMessage For="@(() => _profile.LastName)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.SecondLastName" class="form-control" placeholder="Segundo apellido (opcional)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.EmailAddress" class="form-control" placeholder="Correo electronico"/>
-    <ValidationMessage For="@(() => _profile.EmailAddress)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.Phone" class="form-control" placeholder="Teléfono"/>
-    <ValidationMessage For="@(() => _profile.Phone)"/>
-    <br/>
-    <button disabled="@(!context.Validate())" type="submit" class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfils</button>
-    <button type="button" class="btn btn-primary" @onclick="GetProfile">Ver perfil</button>
-    <span>&nbsp;&nbsp;</span>@(_profile.Message ?? string.Empty)
-</EditForm>
+@inject NavigationManager Navigation
+@inject IJSRuntime JSInterop
+@inject HttpClient Client
+@using BlazingChat.Shared.Models.DTOs
+@using Newtonsoft.Json
+@using Models.Configs
 
 
-@code {    
-    protected override async Task OnInitializedAsync() => await _profile.GetProfile();
+<div class="row col-8">
+    <div class="col-4">
+        <img src="@(_profile.UrlImageProfile ?? _image)" class="img-thumbnail" width="350px" height="400px">
+        <InputFile OnChange="InputFileChange" class="form-control col-3 mt-1"></InputFile>
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated  bg-success" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%">75%</div>
+    </div>
+    </div>
+    <div class="col-7">
+        <EditForm class="row g-4" Model="@_profile">
+            <DataAnnotationsValidator />
+            <div class="col-md-5">
+                <label for="inputName" class="form-label">Primer nombre</label>
+                <InputText id="inputName" @bind-Value="@_profile.FirstName" class="form-control" placeholder="Nombre(s)"/>
+                <ValidationMessage For="@(() => _profile.FirstName)"/>
+            </div>
+            <div class="col-md-5">
+                <label for="inputEmail4" class="form-label">Segundo nombre</label>
+                <InputText @bind-Value="@_profile.SecondName" class="form-control" placeholder="Segundo nombre (opcional)"/>
+            </div>
+            <div class="col-md-5">
+                <label for="inputEmail4" class="form-label">Primer apellido</label>
+                <InputText @bind-Value="@_profile.LastName" class="form-control" placeholder="Primer apellido"/>
+                <ValidationMessage For="@(() => _profile.LastName)"/>
+            </div>
+            <div class="col-md-4">
+                <label for="inputEmail4" class="form-label">Segundo apellido</label>
+                <InputText @bind-Value="@_profile.SecondLastName" class="form-control" placeholder="Segundo apellido (opcional)"/>
+            </div>
+            <div class="col-md-8">
+                <label for="inputEmail4" class="form-label">Email</label>
+                <InputText @bind-Value="@_profile.EmailAddress" class="form-control" placeholder="Correo electronico"/>
+                <ValidationMessage For="@(() => _profile.EmailAddress)"/>
+            </div>
+            <div class="input-group mb-2">        
+                <div class="col-sm-2">
+                    <InputSelect class="form-select" @bind-Value="@IdOption">
+                        @foreach (var code in _areaCodes)
+                        {
+                            <option value="@(code.AreaCode)" selected=@(code.IsSelected)>@(code.AreaCode)</option>
+                        }
+                        </InputSelect>
+                </div>
+                <div class="col-md-4">
+                    <InputText @bind-Value="@_phone" class="form-control" placeholder="Teléfono"/>          
+                 </div>           
+            </div>    
+            <ValidationMessage For="@(() => _profile.Phone)"/>
+            <div class="col-12">
+            <button disabled="@(!context.Validate())" type="submit" class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfil</button>
+            <button type="button" class="btn btn-primary" @onclick="GetProfile">Ver perfil</button>
+            <span>&nbsp;&nbsp;</span>@(_profile.Message ?? string.Empty)
+            </div>    
+        </EditForm>
+    </div>    
+</div>
 
-    private async Task UpdateProfile() => await _profile.UpdateProfile(_profile);
 
-    private async Task GetProfile() => await _profile.GetProfile();
+@code {
+    private List<AreaCodeVM> _areaCodes = new();
+    private string IdOption = string.Empty;
+    private string _image = string.Empty;
+    private long _maxSizeFile = 1024000 * 15;
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? Authentication { get; set; }
+    private string _phone = string.Empty;
+
+    private IJSObjectReference? jsModule;
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender)
+        {
+            //jsModule = await JSInterop.InvokeAsync<IJSObjectReference>("import", "./wwwroot/js/interop.js");
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    protected override async Task OnInitializedAsync() 
+    {
+        var authState = await Authentication!;
+        var user = authState.User;
+        
+        if(user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var claim = user.FindFirst(c => c.Type.Equals(ClaimTypes.NameIdentifier));
+            _profile.UserId = Convert.ToInt64(claim!.Value);
+            await _profile.GetProfile(_profile.UserId);
+            var index = _profile.Phone.IndexOf('-');
+            _phone = _profile.Phone.Substring(index+1);
+            await foreach (var areacode in _profile.GetAreaCodes())
+            {
+                int id = 1;
+                var compare = _profile.Phone.StartsWith($"{areacode}");
+                _areaCodes.Add(new AreaCodeVM{IdOption = id,AreaCode = areacode, IsSelected = compare});
+                StateHasChanged();
+                ++id;
+            }
+        }        
+    }
+
+    private async Task InputFileChange(InputFileChangeEventArgs input)
+    {
+        foreach (var file in input.GetMultipleFiles())
+        {
+            var inputFile = file;
+            
+            using(var st = inputFile.OpenReadStream(_maxSizeFile))
+            {
+                var configs = await Client.GetStringAsync("api/configuration/firebase");
+                var jsonOb = JsonConvert.DeserializeObject<Firebase>(configs);
+                var buffer = new byte[inputFile.Size];
+                await st.ReadAsync(buffer);
+                _image = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+                string nameImage = $"{_profile.FirstName} {_profile.LastName}";
+                StateHasChanged();
+                _image = await JSInterop.InvokeAsync<string>("MyLib.UploadFile", new ImageDto{FolderName = _profile.FirstName + " " + _profile.LastName, ImageData = buffer, ImageName = nameImage}, jsonOb);
+                StateHasChanged();
+            } 
+        }
+    }
+
+    private async Task UpdateProfile() 
+    {
+        _profile.UrlImageProfile = _image != _profile.UrlImageProfile ?_image : _profile.UrlImageProfile;
+        _profile.Phone = $"{IdOption} {_phone}";
+        await _profile.UpdateProfile(_profile);
+    } 
+
+    private async Task GetProfile() => await _profile.GetProfile(_profile.UserId);
+
 }

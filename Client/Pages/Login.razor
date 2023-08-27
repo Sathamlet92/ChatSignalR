@@ -1,1 +1,80 @@
-﻿
+﻿@page "/"
+@using BlazingChat.Service.ViewsModels
+@inject ILoginVM _loginVM
+@inject NavigationManager _navigationManager
+
+<h2><b>Login</b></h2>
+<hr>
+
+@* <div class="col-6">
+    <input type="text" @bind="_loginVM.User" class="form-control" placeholder="email address">
+</div>
+<br />
+<div class="col-6">
+    <input type="password" @bind="_loginVM.Password" class="form-control" placeholder="password">
+</div>
+<br />
+<div class="col-6">
+    <button class="btn btn-success" @onclick="LoginUser">Login</button>
+    <button class="btn btn-primary" @onclick="FacebookSingIn"><i class="bi bi-facebook"></i> Iniciar con facebook</button>
+    <button class="btn btn-danger" @onclick="GoogleSingIn"><i class="bi bi-google"></i> Iniciar con google</button>
+    <span>&nbsp;&nbsp;</span>@(_loginVM.Message ?? string.Empty)
+</div> *@
+<EditForm Model="@_loginVM" OnValidSubmit="OnValidSubmit">
+    <MudGrid class="justify-center">
+        <MudItem xs="7" sm="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="username/email" @bind-Value="_loginVM.User"/>
+                    <MudTextField Label="password" @bind-Value="_loginVM.Password"/>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton @onclick="LoginUser" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info" Class="ml-auto">Iniciar sesión</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? Authentication { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await Authentication!;
+        var user = authState.User;
+        
+        if(user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            _navigationManager.NavigateTo("/profile");
+        }
+    }
+
+    bool success;
+    private async Task LoginUser()
+    {
+        var success = await _loginVM.LoginUser();
+        if(success)
+            _navigationManager.NavigateTo("/profile", true);
+    }
+    private void FacebookSingIn()
+    {
+        _navigationManager.NavigateTo("api/user/facebooksignin",true);
+    }
+
+    private void GoogleSingIn()
+    {
+        _navigationManager.NavigateTo("api/user/googlesignin",true);
+    }
+    private async Task OnValidSubmit(EditContext context)
+    {
+        success = true;
+        await LoginUser();
+        StateHasChanged();
+    }
+}
+
+
+

@@ -21,24 +21,27 @@ public class ProfileVM : IProfileVM
     [Required(AllowEmptyStrings = false)]
     public string Phone { get; set; } = string.Empty;
     public string? Message { get; set; } = string.Empty;
+    public List<AreaCodeVM>? AreaCodes { get; set; }
+    public string? UrlImageProfile { get; set; }
+
     private readonly IMapper? _mapper;
     private HttpClient? _client;
 
     public ProfileVM()
     {
-        
+        AreaCodes = new();        
     }
 
-    public ProfileVM(IMapper mapper, HttpClient client)
+    public ProfileVM(IMapper mapper, HttpClient client) :this()
     {
         _mapper = mapper;
         _client = client;
     }
 
-    public async Task GetProfile()
+    public async Task GetProfile(long userId)
     {
-        var response = await _client!.GetFromJsonAsync<UserDto>("api/User/getprofile/1");
-        _mapper!.Map(response, this);
+        var response = await _client!.GetFromJsonAsync<UserDto>($"api/User/getprofile/{userId}");
+        var algo = _mapper!.Map(response, this);
     }
 
     public async Task UpdateProfile(IProfileVM model)
@@ -49,4 +52,14 @@ public class ProfileVM : IProfileVM
         var objRes = JsonConvert.DeserializeObject<ResponseOut<UserDto>>(response);
         model = _mapper.Map(objRes!.Data, model);
     }
+
+    public async IAsyncEnumerable<string> GetAreaCodes()
+    {
+        var response = await _client!.GetFromJsonAsync<ResponseOut<List<string>>>("api/user/getareacodes");
+        foreach (var areaCode in response!.Data!)
+        {
+            yield return areaCode;   
+        }
+    }
+    
 }

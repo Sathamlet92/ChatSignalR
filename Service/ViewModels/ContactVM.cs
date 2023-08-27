@@ -10,6 +10,7 @@ public class ContactVM : IContactVM
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public string  AreaCode  { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string LastMessage { get; set; } = string.Empty;
     private readonly HttpClient? _client;
@@ -23,18 +24,13 @@ public class ContactVM : IContactVM
         _client = client;
         _mapper = mapper;
     }
-    public async IAsyncEnumerable<IContactVM> GetContacts()
+    public async IAsyncEnumerable<IContactVM> GetContacts(long idUser)
     {
-        var resultReq = await _client!.GetFromJsonAsync<List<ContactDto>>("api/user/contacts/1");
+        var resultReq = await _client!.GetFromJsonAsync<List<ContactDto>>($"api/user/contacts/{idUser}");
 
         foreach (var contact in resultReq!)
         {
             yield return _mapper!.Map<IContactVM>(contact);           
         }            
-    }
-
-    public IAsyncEnumerable<IContactVM> GetContactsChatting()
-    {
-        throw new NotImplementedException();
     }
 }

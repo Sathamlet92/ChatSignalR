@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlazingChat.Server.Models.Entities;
+namespace BlazingChat.Domain.Models.Entites;
 
 public partial class Phone
 {
@@ -11,7 +11,7 @@ public partial class Phone
 
     public string AreaCode { get; set; } = null!;
 
-    public string Phone1 { get; set; } = null!;
+    public string Tel { get; set; } = null!;
 
     public virtual AreaCode AreaCodeNavigation { get; set; } = null!;
 
