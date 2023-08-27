@@ -2,36 +2,44 @@
 @inject NavigationManager _navigation
 @inject HttpClient _client
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<MudLayout>
+    <MudAppBar>         
         <AuthorizeView>
-        <Authorized>
-            <div class="top-row px-4">        
-                <h6 class="mx-2">Bienvenido: @context.User.Identity!.Name</h6>
-                <button class="btn btn-danger mx-2" @onclick="LogoutUser">Cerrar sesión</button>
-            </div> 
-        </Authorized>
-        <NotAuthorized>
-            <div class="top-row px-4">
-                <button class="btn btn-danger mx-2" @onclick="LogInUser">Crear cuenta</button>
-                <button class="btn btn-primary mx-2" @onclick="LogInUser">Iniciar sesión</button>                
-            </div> 
-        </NotAuthorized> 
-        </AuthorizeView>
-        <div class="content px-4"> 
-            @Body     
-        </div>              
-    </main>
-    
-</div>
+            <Authorized>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Success" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <MudPaper   class="top-row px-8">        
+                    <h6 class="mx-2">Bienvenido: @context.User.Identity!.Name</h6>
+                    <MudButton Variant="Variant.Filled" @onclick="LogoutUser" Color="Color.Secondary">Cerrar sesión</MudButton>
+                </MudPaper > 
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">Crear cuenta</MudButton>
+                <MudButton Variant="Variant.Filled" @onclick="LogInUser" Color="Color.Secondary">Iniciar sesión</MudButton>
+            </NotAuthorized> 
+        </AuthorizeView>       
+    </MudAppBar>
+        <AuthorizeView>
+            <Authorized>
+                <MudDrawer @bind-Open="@_drawerOpen">
+                    <NavMenu/>
+                </MudDrawer>
+            </Authorized>                     
+        </AuthorizeView>           
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+@code {
+    bool _drawerOpen = true;
 
-
-
-
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
 
 
 

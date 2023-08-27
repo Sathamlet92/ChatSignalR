@@ -17,6 +17,8 @@ public interface IProfileVM
     public string? Message { get; set; }
     public List<AreaCodeVM>? AreaCodes { get; set; }
 
+    public string? UrlImageProfile { get; set; }
+
     public Task UpdateProfile(IProfileVM model);
     public Task GetProfile(long userId);
     public IAsyncEnumerable<string> GetAreaCodes();

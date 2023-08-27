@@ -5,6 +5,7 @@ using BlazingChat.Service.ViewsModels;
 using BlazingChat.Service.Mappings;
 using Microsoft.AspNetCore.Components.Authorization;
 using BlazingChat.Service.Security;
+using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -19,6 +20,7 @@ builder.Services.AddAutoMapper(cfn =>
     cfn.AddProfile<UserProfile>();
     cfn.AddProfile<SettingsProfile>();
 });
+builder.Services.AddMudServices();
 builder.Services.AddTransient(sp => 
                 new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddHttpClient<IContactVM, ContactVM>("BlazingChatClient", client => {client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);});

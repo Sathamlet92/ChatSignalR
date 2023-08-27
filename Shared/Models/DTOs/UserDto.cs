@@ -13,4 +13,5 @@ public class UserDto
     public string? Message { get; set; }
     public string? ProfilePictureUrl { get; set; }
     public string?  AboutMe { get; set; }
+    public string? UrlImageProfile { get; set; }
 }

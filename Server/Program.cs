@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,7 +22,6 @@ builder.Services.AddAutoMapper(cfn =>
     cfn.AddProfile<UserProfile>();
     cfn.AddProfile<SettingsProfile>();
 });
-
 var parentDir = Environment.CurrentDirectory;
 var connectionString = string.Format(builder.Configuration.GetConnectionString("BlazingChat")!, parentDir.Replace("server", "Server"));
 builder.Services.AddDbContextFactory<ChatContext>(opt => opt.UseSqlite(connectionString));
