@@ -1,0 +1,57 @@
+﻿@attribute [Authorize]
+
+<div class="col-md-6 col-lg-7 col-xl-8"> 
+    <ul class="list-unstyled">
+        @if(_messages.Count > 0)
+        {
+          <Virtualize Items="_messages" Context="message">
+            @if(message.FromUserId == FromUserId)
+              {
+                  <li class="d-flex justify-content-between mb-4">        
+                      <img src="@MessagingProfile!.UrlPicture" alt="avatar"
+                          class="rounded-circle d-flex align-self-start img-fluid me-3 shadow-1-strong" width="60">
+                      <div class="card w-100">
+                          <div class="card-header d-flex justify-content-between p-3">
+                              <p class="fw-bold mb-0">@MessagingProfile!.UserName</p>
+                              <p class="text-muted small mb-0"><i class="far fa-clock"></i> 12 mins ago</p>
+                          </div>
+                          <div class="card-body">
+                              <p class="mb-0">
+                                  @message.MessageText
+                              </p>
+                          </div>
+                      </div>
+                  </li>
+              }
+              else
+              {
+                  <li class="d-flex justify-content-between mb-4">
+                      <div class="card w-100">
+                        <div class="card-header d-flex justify-content-between p-3">
+                          <p class="fw-bold mb-0">@Contact!.UserName</p>
+                          <p class="text-muted small mb-0"><i class="far fa-clock"></i> 13 mins ago</p>
+                        </div>
+                        <div class="card-body">
+                          <p class="mb-0">
+                            @message.MessageText
+                          </p>
+                        </div>
+                      </div>
+                      <img src="@Contact.UrlPicture" alt="avatar"
+                        class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60">
+                  </li>
+              }
+
+          </Virtualize>
+        }
+        <li class="bg-white mb-3">
+            <div class="form-outline">
+              <textarea @onkeydown="PressEnter" placeholder="Escribe tu mensaje" @bind="@MessageText" @bind:event="oninput" class="form-control" id="textAreaExample2" rows="4"></textarea>
+            </div>
+          </li>
+        <button type="button" @onclick="Send" class="btn btn-danger rounded-pill float-end mb-4">Send</button>
+    </ul>
+</div>
+
+
+

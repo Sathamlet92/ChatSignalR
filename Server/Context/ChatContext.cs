@@ -32,11 +32,11 @@ public partial class ChatContext : DbContext
     {
         modelBuilder.Entity<AreaCode>(entity =>
         {
-            entity.HasKey(e => e.AreaCode1);
+            entity.HasKey(e => e.CodeNum);
 
             entity.ToTable("Area_Code");
 
-            entity.Property(e => e.AreaCode1).HasColumnName("area_code");
+            entity.Property(e => e.CodeNum).HasColumnName("area_code");
             entity.Property(e => e.Country).HasColumnName("country");
             entity.Property(e => e.CountryCode).HasColumnName("country_code");
         });

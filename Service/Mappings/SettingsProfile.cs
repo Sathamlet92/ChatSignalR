@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BlazingChat.Domain.Models.Entites;
+using BlazingChat.Service.ViewsModels;
 using BlazingChat.Shared.Models.DTOs;
 
 namespace BlazingChat.Service.Mappings;

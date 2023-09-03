@@ -1,6 +1,9 @@
 ﻿@page "/contacts"
+@attribute [Authorize]
 @using BlazingChat.Service.ViewsModels;
+@using System.Security.Claims
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider _auth
 @inject IContactVM _contactVM
 
 <PageTitle>Contactos</PageTitle>
@@ -15,44 +18,53 @@
 </div>
 
 <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>Nombre(s)</th>
-                <th>Apellido(s)</th>
-                <th>Teléfono</th>
-                <th>Email</th>
+    <thead>
+        <tr>
+            <th>Nombre(s)</th>
+            <th>Apellido(s)</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Virtualize 
+            Items="@(string.IsNullOrEmpty(_filter) ?_contactsList : _contactsList.Where(c => c.FirstName.Contains(_filter, StringComparison.InvariantCultureIgnoreCase) || c.LastName.Contains(_filter, StringComparison.InvariantCultureIgnoreCase) || c.Phone!.Contains(_filter, StringComparison.InvariantCultureIgnoreCase)).ToList())"
+            Context="contact">
+            <tr style="cursor: pointer;" @onclick="(e) => NavigateToChat(contact.ContactId)">                                       
+                <td>@contact.FirstName</td>
+                <td>@contact.LastName</td>
+                <td >@contact.Phone</td>                   
+                <td>@contact.Email</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var contact in string.IsNullOrEmpty(_filter) ?_contactsList : _contactsList.Where(c => c.FirstName.Contains(_filter, StringComparison.InvariantCultureIgnoreCase) || c.LastName.Contains(_filter, StringComparison.InvariantCultureIgnoreCase) || c.Phone!.Contains(_filter, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                <tr style="cursor: pointer;" @onclick="(e) => NavigateToChat(contact.ContactId)">                                       
-                    <td>@contact.FirstName</td>
-                    <td>@contact.LastName</td>
-                    <td >@contact.Phone</td>                   
-                    <td>@contact.Email</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        </Virtualize>
+    </tbody>
+</table>
+
+
  
 
 @code {
 
     private string _filter = string.Empty;
-    private bool _selectChat = false;
-    private string _activeClass = string.Empty;
-
     private List<IContactVM> _contactsList = new();
-
 
     protected override async Task OnInitializedAsync()
     {
-        await foreach (var item in _contactVM.GetContacts())
+        var authUser = await _auth.GetAuthenticationStateAsync();
+        var user = authUser.User;
+        if(user.Identity != null && user.Identity.IsAuthenticated)
         {
-            _contactsList.Add(item);
-            this.StateHasChanged();          
-        }     
+            var claim = user.FindFirst(c => c.Type.Equals(ClaimTypes.NameIdentifier));
+            await foreach (var item in _contactVM.GetContacts(Convert.ToInt64(claim!.Value)))
+            {
+                _contactsList.Add(item);
+                this.StateHasChanged();          
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/", true);
+        }          
     }
     
 

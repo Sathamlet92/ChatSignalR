@@ -1,17 +1,22 @@
 ﻿@page "/settings"
+@attribute [Authorize]
 @using BlazingChat.Shared
 @inject ISettingsVM _settings
+
 
 <h2><b>Settings</b></h2> 
 <hr />
 
 <div class="col-12">
-    <input type="checkbox" @bind="@_settings.Notifications" id="chkNotification">
-    <label> Notification </label>    
-    <br>   
-
-    <input type="checkbox" @bind="@_settings.DarkTheme" id="chkDarkTheme">
-    <label> Dark Theme </label>    
+    <MudToggleIconButton @bind-Toggled="@_settings.Notifications"
+                     Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Error" Title="Activar notificaciones"
+                     ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" ToggledTitle="Desactivar notificaciones"/>
+    <label class="ml-0">Notificaciones</label> 
+    <br>
+    <MudToggleIconButton Class="mr-0" @bind-Toggled="@_settings.DarkTheme"
+                     Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Dark" Title="Off"
+                     ToggledIcon="@Icons.Material.Filled.WbSunny" ToggledColor="@Color.Warning" ToggledTitle="Modo oscuro"/>
+    <label class="ml-0">Dark Theme</label>    
     <br>
 </div>
 <div class="col-12">
@@ -19,7 +24,5 @@
 </div>
 
 @code {
-    private WeatherForecast[]? forecasts;
-
     protected override async Task OnInitializedAsync() => await _settings.GetSettings();
 }

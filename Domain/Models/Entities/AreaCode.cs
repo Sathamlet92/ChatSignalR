@@ -4,7 +4,7 @@ namespace BlazingChat.Domain.Models.Entites;
 
 public partial class AreaCode
 {
-    public string AreaCode1 { get; set; } = null!;
+    public string CodeNum { get; set; } = null!;
 
     public string CountryCode { get; set; } = null!;
 

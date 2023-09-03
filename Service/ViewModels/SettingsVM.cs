@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using BlazingChat.Shared.Models.DTOs;
-
+namespace BlazingChat.Service.ViewsModels;
 public class SettingsVM : ISettingsVM
 {
     public bool Notifications { get; set; }

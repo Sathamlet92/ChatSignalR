@@ -1,35 +1,134 @@
-﻿@page "/"
-@using BlazingChat.Service.ViewsModels
-@inject IProfileVM _profile
-
-<EditForm class="col-12" Model="@_profile">
-    <DataAnnotationsValidator />
-    <InputText @bind-Value="@_profile.FirstName" class="form-control" placeholder="Nombre(s)"/>
-    <ValidationMessage For="@(() => _profile.FirstName)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.SecondName" class="form-control" placeholder="Segundo nombre (opcional)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.LastName" class="form-control" placeholder="Primer apellido"/>
-    <ValidationMessage For="@(() => _profile.LastName)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.SecondLastName" class="form-control" placeholder="Segundo apellido (opcional)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.EmailAddress" class="form-control" placeholder="Correo electronico"/>
-    <ValidationMessage For="@(() => _profile.EmailAddress)"/>
-    <br/>
-    <InputText @bind-Value="@_profile.Phone" class="form-control" placeholder="Teléfono"/>
-    <ValidationMessage For="@(() => _profile.Phone)"/>
-    <br/>
-    <button disabled="@(!context.Validate())" type="submit" class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfils</button>
-    <button type="button" class="btn btn-primary" @onclick="GetProfile">Ver perfil</button>
-    <span>&nbsp;&nbsp;</span>@(_profile.Message ?? string.Empty)
-</EditForm>
+﻿@page "/profile"
+@attribute [Authorize]
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
 
 
-@code {    
-    protected override async Task OnInitializedAsync() => await _profile.GetProfile();
 
-    private async Task UpdateProfile() => await _profile.UpdateProfile(_profile);
+<div class="d-flex justify-center">    
+    <MudGrid Class="d-flex justify-center">
+        <div class="d-flex justify-center">
+            <MudItem Class="mt-13">
+               <MudPaper>
+                   <div class="d-flex justify-center">
+                        <MudImage ObjectFit="ObjectFit.Cover" ObjectPosition="@ObjectPosition.Center" Height="350" Width="300" Src="@(ProfileVM!.UrlImageProfile != _previewImage && !string.IsNullOrEmpty(_previewImage)? _previewImage : ProfileVM!.UrlImageProfile)" Alt="Öxarárfoss, Iceland"  Elevation="25" Class="d-flex align-center rounded"/>
+                   </div>
+                   @if(progressPercentage > 0 && progressPercentage <= 100)
+                   {
+                        <MudProgressLinear Color="Color.Info" Striped="true" Size="Size.Large" Value="progressPercentage" Class="my-0">
+                            <MudText Typo="Typo.subtitle1">
+                                <small>@progressPercentageString</small>
+                            </MudText>
+                        </MudProgressLinear>
+                   }
+                   
+                   <div class="d-flex justify-center">
+                       <MudFileUpload @ref="_inputRef" Accept="image/*" T="IBrowserFile" FilesChanged="InputFile">
+                           <ButtonTemplate>
+                               <MudIconButton HtmlTag="label"
+                                  Color="Color.Info"
+                                  Icon="@Icons.Material.Filled.PhotoCamera"
+                                  for="@context">
+                               </MudIconButton>
+                           </ButtonTemplate>
+                       </MudFileUpload>                      
+                   </div>                   
+               </MudPaper>
+            </MudItem>
+        </div>        
+        <MudItem sm="7" Class="mr-7">
+            <MudPaper Class="pa-4">
+                <MudForm  @ref="form" Model="ProfileVM" @bind-IsValid="@success"  @bind-Errors="@errors">
+                    <MudTextField T="string"  @bind-Value="ProfileVM!.FirstName" Label="Primer nombre" Required="true" RequiredError="El primer nombre es requerido" />
+                    <MudTextField T="string"  @bind-Value="ProfileVM!.SecondName" Label="Segundo nombre"/>
+                    <Virtualize Items="ProfileVM.Emails" Context="email">
+                        <MudTextField Disabled="@email.HasPrincipal!.Value" T="string" @bind-Value="email.EmailAddress" Label="@(email.HasPrincipal!.Value ? $"Correo electronico principal" : $"Correo electronico")" Required="@email.HasPrincipal!.Value" RequiredError="Email principal es requerido"
+                              Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" /> 
+                    </Virtualize>
+                    <MudTextField T="string"  @bind-Value="ProfileVM!.LastName" Label="Primer apellido" Required="true" RequiredError="El primer apellido es requerido" />
+                    <MudTextField T="string"  @bind-Value="ProfileVM!.SecondLastName" Label="Segundo apellido"/>
+                    <div class="input-group mb-2">
+                        <Virtualize Items="_areaCodes" Context="areaList">
+                            <div class="col col-md-2">
+                                <MudSelect Class="ml-7 mr-2" Margin="Margin.Normal" T="string" Label="Area" Variant="Variant.Filled">
+                                    <Virtualize Items="areaList" Context="areaCode">
+                                        <MudSelectItem Value="@areaCode.AreaCode" /> 
+                                    </Virtualize>
+                                </MudSelect>
+                            </div> 
+                            <div class="col-md-4 mt-2 mr-0">
+                                <MudTextField Margin="Margin.Normal" Class="form-control" T="string"  @bind-Value="ProfileVM!.Phones[_areaCodes.IndexOf(areaList)].Phone" Label="@("Telefono " + (_areaCodes!.IndexOf(areaList) + 1))" Required="true" RequiredError="Los telefonos no se pueden borrar"/>
+                            </div>
+                        </Virtualize>
+                    </div>
+                                
+                </MudForm>                               
+            </MudPaper>
+            @* <MudPaper Class="pa-4 mt-4">
+                <button disabled="@(!context.Validate())" type="submit" class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfil</button>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>form.Validate())">Validate</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="@(()=>form.ResetAsync())" Class="mx-2">Reset</MudButton>
+                <MudButton Variant="Variant.Filled" DisableElevation="true" OnClick="@(()=>form.ResetValidation())">Reset Validation</MudButton>
+            </MudPaper> *@
+            <MudButton @onclick="UpdateProfile" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto mt-5 d-flex justify-center">Actualizar perfil</MudButton> 
+        </MudItem>
+    </MudGrid>
+</div>
 
-    private async Task GetProfile() => await _profile.GetProfile();
+@code {
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 8)
+            yield return "Password must be at least of length 8";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "Passwords don't match";
+        return null;
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        context.Validate();
+        StateHasChanged();
+    }
+
 }
+
+
+@* <MudTextField T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1"
+                              InputType="InputType.Password"
+                              Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                              RequiredError="Password is required!"/>
+                <MudTextField T="string"
+                              Label="Password" HelperText="Repeat the password" InputType="InputType.Password"
+                              Validation="@(new Func<string, string>(PasswordMatch))"/>
+                <div class="d-flex">
+                    <MudRadioGroup T="string" Required="true" RequiredError="Account type is required!">
+                        <MudRadio Option="@("Personal")">Personal</MudRadio>
+                        <MudRadio Option="@("Professional")">Professional</MudRadio>
+                    </MudRadioGroup>
+                </div>
+                <div class="d-flex align-center justify-space-between">
+                    <MudCheckBox T="bool" Required="true" RequiredError="You must agree" Label="I agree!"  />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Register</MudButton>
+                </div> *@
