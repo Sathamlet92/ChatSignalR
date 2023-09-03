@@ -3,21 +3,20 @@
 
 <CascadingAuthenticationState>
     <MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-        <MudNavLink Href="/servers" Match="NavLinkMatch.Prefix">Servers</MudNavLink>
-        <MudNavGroup Title="Settings" Expanded="true">
-            <MudNavLink Href="/users"  Match="NavLinkMatch.Prefix">Users</MudNavLink>
-            <MudNavLink Href="/security"  Match="NavLinkMatch.Prefix">Security</MudNavLink>
-        </MudNavGroup>
-    <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
-    @if(@HostEnvironment.Environment.Equals("Development"))
-        {
-            <environment include="Development">
-                <div class="position-absolute bottom-0 text-center start-0 text-secondary">
-                    <p><small>Environment is Development</small></p>
-                </div>
-            </environment>
-        } 
+        <MudNavLink Href="/" Match="NavLinkMatch.All">Perfil</MudNavLink>
+            <MudNavLink Href="/contacts" Match="NavLinkMatch.Prefix">Contactos</MudNavLink>
+            <MudNavGroup Title="Settings" Expanded="true">
+                <MudNavLink Href="/settings"  Match="NavLinkMatch.Prefix">Preferencias</MudNavLink>
+                <MudNavLink Href="/security"  Match="NavLinkMatch.Prefix">Security</MudNavLink>
+            </MudNavGroup>
+        <MudNavLink  Href="/about"  Match="NavLinkMatch.Prefix">Acerca de la aplicacion</MudNavLink>
+        <MudNavLink Disabled Match="NavLinkMatch.Prefix">
+            
+            @if(@HostEnvironment.Environment.Equals("Development"))
+            {
+                @HostEnvironment.Environment
+            } 
+        </MudNavLink>   
     </MudNavMenu>    
 </CascadingAuthenticationState>
 

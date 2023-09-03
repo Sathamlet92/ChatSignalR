@@ -28,6 +28,7 @@ builder.Services.AddHttpClient<IContactVM, ContactVM>("BlazingChatClient", clien
 builder.Services.AddHttpClient<ILoginVM, LoginVM>("BlazingChatClient", client => {client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);});
 builder.Services.AddHttpClient<IProfileVM, ProfileVM>("BlazingChatClient", client => {client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);});
 builder.Services.AddHttpClient<ISettingsVM, SettingsVM>("BlazingChatClient", client => {client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);});
+builder.Services.AddHttpClient<IMessagingProfileVM, MessagingProfileVM>("BlazingChatClient", client => {client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);});
 builder.Services.AddScoped<AuthenticationStateProvider, ChatAuthenticationStateProvider>();
 
 await builder.Build().RunAsync();

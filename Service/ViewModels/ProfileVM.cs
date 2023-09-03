@@ -17,11 +17,12 @@ public class ProfileVM : IProfileVM
     public string LastName { get; set; } = string.Empty;
     public string? SecondLastName { get; set; } = string.Empty;
     [Required(AllowEmptyStrings = false)]
-    public string EmailAddress { get; set; } = string.Empty;
+    public List<EmailDto> Emails { get; set; } = new();
     [Required(AllowEmptyStrings = false)]
-    public string Phone { get; set; } = string.Empty;
+    public List<PhoneDto> Phones { get; set; } = new();
     public string? Message { get; set; } = string.Empty;
     public List<AreaCodeVM>? AreaCodes { get; set; }
+    
     public string? UrlImageProfile { get; set; }
 
     private readonly IMapper? _mapper;
@@ -44,13 +45,13 @@ public class ProfileVM : IProfileVM
         var algo = _mapper!.Map(response, this);
     }
 
-    public async Task UpdateProfile(IProfileVM model)
+    public async Task UpdateProfile()
     {
-        var entReq = _mapper!.Map<UserDto>(model);
+        var entReq = _mapper!.Map<UserDto>(this);
         var result = await _client!.PutAsJsonAsync<UserDto>("api/user", entReq);
         var response = await result.Content.ReadAsStringAsync();
         var objRes = JsonConvert.DeserializeObject<ResponseOut<UserDto>>(response);
-        model = _mapper.Map(objRes!.Data, model);
+        _mapper.Map(objRes!.Data, this);
     }
 
     public async IAsyncEnumerable<string> GetAreaCodes()

@@ -93,6 +93,8 @@ public class UserController : ControllerBase
                         .ThenInclude(u => u.Phones)
                     .Include(c => c.ContactUser)
                         .ThenInclude(u => u.Emails)
+                    .Include(c => c.ContactUser)
+                        .ThenInclude(u => u.Logins)
                 .ProjectTo<ContactDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();            
         }            
@@ -103,10 +105,27 @@ public class UserController : ControllerBase
     {
         using (var context = await _factoryContext.CreateDbContextAsync())
         {
-            var entity = await context.Users!.Include(u => u.Emails).Include(u => u.Phones).FirstOrDefaultAsync(u => u.UserId.Equals(user.UserId));
+            var entity = await context.Users!.FirstOrDefaultAsync(u => u.UserId.Equals(user.UserId));
+            
+            foreach (var phone in user.Phones)
+            {
+                var entityPhone = await context.Phones!.FirstOrDefaultAsync(p => p.UserId.Equals(entity!.UserId) && p.PhoneId.Equals(phone.PhoneId));
+                entityPhone = _mapper.Map(phone, entityPhone);
+                context.Update<Phone>(entityPhone!);         
+            }
+            foreach (var email in user.Emails)
+            {
+                var entityEmail = await context.Emails!.FirstOrDefaultAsync(p => p.UserId.Equals(entity!.UserId) && p.EmailId.Equals(email.EmailId));
+                entityEmail = _mapper.Map(email, entityEmail);
+                context.Update<Email>(entityEmail!);                  
+            }
+
             entity = _mapper.Map(user, entity);
+
+            context.Update<User>(entity!);
+            context.Emails!.UpdateRange();
             var result = await context.SaveChangesAsync();
-            await Task.FromResult(entity);
+            //await Task.FromResult(entity);
             return ResponseOut<UserDto>.CreateResponse(true, "Actualizado correctamente", user);
         }   
     }
@@ -116,11 +135,12 @@ public class UserController : ControllerBase
     {
         using (var context = await _factoryContext.CreateDbContextAsync())
         {
-            return await context.Users!.Where(u => u.UserId.Equals(idUser))
+            var user = await context.Users!.Where(u => u.UserId.Equals(idUser))
                 .Include(u => u.Phones)
                 .Include(u => u.Emails)
                 .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
                 .FirstAsync();
+            return user;
         }        
     }
 

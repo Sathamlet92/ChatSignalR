@@ -6,4 +6,5 @@ public class PhoneDto
     public string AreaCode { get; set; } = null!;
     [Phone]
     public string Phone {get; set;} = null!;
+    public long PhoneId { get; set; }
 }

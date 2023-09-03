@@ -38,11 +38,13 @@ public class ContactProfile : Profile
             .ForMember(vm => vm.Email, 
                        opt => opt.MapFrom(dto => dto.Emails.Single(e => e.HasPrincipal!.Value).EmailAddress))
             .ForMember(vm => vm.Phone, 
-                       opt => opt.MapFrom(dto => $" {dto.Phones.Single().AreaCode}-{dto.Phones.Single().Phone}"))
+                       opt => opt.MapFrom(dto => $" {dto.Phones.First().AreaCode}-{dto.Phones.First().Phone}"))
             .ForMember(vm => vm.FirstName, 
                        opt => opt.MapFrom(dto => $"{dto.FirstName} {dto.SecondName}"))
             .ForMember(vm => vm.LastName, 
-                       opt => opt.MapFrom(dto => $"{dto.LastName} {dto.LastSecondName}"));
+                       opt => opt.MapFrom(dto => $"{dto.LastName} {dto.LastSecondName}"))
+            .ForMember(vm => vm.UrlImage, 
+                        opt => opt.MapFrom(src => src.UrlImage));
         
         CreateMap<Contact, ContactDto>().
             ForMember(dest => dest.Phones, 
@@ -56,7 +58,28 @@ public class ContactProfile : Profile
             ForMember(dest => dest.SecondName, 
                        opt => opt.MapFrom(src => src.ContactName!.Split().Length > 1 ? src.ContactName.Split()[1] : null)).
             ForMember(dest => dest.LastSecondName, 
-                       opt => opt.MapFrom(src => src.ContactLastName!.Split().Length > 1 ? src.ContactLastName.Split()[1] : null)); 
+                       opt => opt.MapFrom(src => src.ContactLastName!.Split().Length > 1 ? src.ContactLastName.Split()[1] : null)).
+            ForMember(dest => dest.UrlImage, 
+                       opt => opt.MapFrom(src => src.ContactUser.ProfilePictureUrl))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.ContactUser.Logins.First().UserName));
+        
+        CreateMap<IContactVM, MessagingContactVM>()
+            .ForMember(dest => 
+                dest.Name, opt => opt.MapFrom(
+                src => $"{src.FirstName} {src.LastName}"))
+            .ForMember(dest => 
+                dest.Email, opt => opt.MapFrom(
+                src => src.Email))
+            .ForMember(dest => 
+                dest.UrlPicture, opt => opt.MapFrom(
+                src => src.UrlImage))
+            .ForMember(dest => 
+                dest.ContactId, opt => opt.MapFrom(
+                src => Convert.ToString(src.ContactId)))
+            .ForMember(dest => 
+                dest.UserName, opt => opt.MapFrom(
+                src => src.UserName));
+            
         CreateMap<Email, EmailDto>();
         CreateMap<Phone, PhoneDto>()
             .ForMember(dest => dest.Phone, 

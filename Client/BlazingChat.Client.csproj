@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="MudBlazor" Version="6.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="7.0.10" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +22,10 @@
     <ProjectReference Include="..\Service\BlazingChat.Service.csproj" />
     <ProjectReference Include="..\Components\BlazingChat.Components.csproj" />
   </ItemGroup>
+
+  <!-- <ItemGroup>
+    <BlazorWebAssemblyLazyLoad Include="BlazingChat.Components.dll"/>
+  </ItemGroup> -->
 
   <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />

@@ -8,8 +8,9 @@ public class ContactDto
     public string FirstName { get; set; } = string.Empty;
     public string? SecondName { get; set; }
     public string LastName { get; set; } = string.Empty;
-    public string? LastSecondName { get; set; } 
-    
+    public string? LastSecondName { get; set; }
+    public string? UrlImage { get; set; }
+    public string UserName { get; set; }  = string.Empty;
     public List<PhoneDto> Phones { get; set; }
     public List<EmailDto> Emails { get; set; }
 
