@@ -2,7 +2,10 @@
 @attribute [Authorize]
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
-<div class="d-flex justify-center">
+
+
+
+<div class="d-flex justify-center">    
     <MudGrid Class="d-flex justify-center">
         <div class="d-flex justify-center">
             <MudItem Class="mt-13">
@@ -29,18 +32,17 @@
                                </MudIconButton>
                            </ButtonTemplate>
                        </MudFileUpload>                      
-                   </div>
-                   
+                   </div>                   
                </MudPaper>
             </MudItem>
         </div>        
         <MudItem sm="7" Class="mr-7">
             <MudPaper Class="pa-4">
-                <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-                    <MudTextField T="string"  @bind-Value="ProfileVM!.FirstName" Label="Primer nombre" Required="true" RequiredError="User name is required!" />
+                <MudForm  @ref="form" Model="ProfileVM" @bind-IsValid="@success"  @bind-Errors="@errors">
+                    <MudTextField T="string"  @bind-Value="ProfileVM!.FirstName" Label="Primer nombre" Required="true" RequiredError="El primer nombre es requerido" />
                     <MudTextField T="string"  @bind-Value="ProfileVM!.SecondName" Label="Segundo nombre"/>
                     <Virtualize Items="ProfileVM.Emails" Context="email">
-                        <MudTextField Disabled="@email.HasPrincipal!.Value" T="string" @bind-Value="email.EmailAddress" Label="@(email.HasPrincipal!.Value ? $"Correo electronico principal" : $"Correo electronico")" Required="@email.HasPrincipal!.Value" RequiredError="Email is required!"
+                        <MudTextField Disabled="@email.HasPrincipal!.Value" T="string" @bind-Value="email.EmailAddress" Label="@(email.HasPrincipal!.Value ? $"Correo electronico principal" : $"Correo electronico")" Required="@email.HasPrincipal!.Value" RequiredError="Email principal es requerido"
                               Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" /> 
                     </Virtualize>
                     <MudTextField T="string"  @bind-Value="ProfileVM!.LastName" Label="Primer apellido" Required="true" RequiredError="El primer apellido es requerido" />
@@ -55,12 +57,12 @@
                                 </MudSelect>
                             </div> 
                             <div class="col-md-4 mt-2 mr-0">
-                                <MudTextField Margin="Margin.Normal" Class="form-control" T="string"  @bind-Value="ProfileVM!.Phones[_areaCodes.IndexOf(areaList)].Phone" Label="@("Telefono " + (_areaCodes.IndexOf(areaList) + 1))"/>
+                                <MudTextField Margin="Margin.Normal" Class="form-control" T="string"  @bind-Value="ProfileVM!.Phones[_areaCodes.IndexOf(areaList)].Phone" Label="@("Telefono " + (_areaCodes!.IndexOf(areaList) + 1))" Required="true" RequiredError="Los telefonos no se pueden borrar"/>
                             </div>
                         </Virtualize>
-                    </div>                  
-                </MudForm>
-                               
+                    </div>
+                                
+                </MudForm>                               
             </MudPaper>
             @* <MudPaper Class="pa-4 mt-4">
                 <button disabled="@(!context.Validate())" type="submit" class="btn btn-primary" @onclick="UpdateProfile">Actualizar perfil</button>
@@ -68,20 +70,9 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="@(()=>form.ResetAsync())" Class="mx-2">Reset</MudButton>
                 <MudButton Variant="Variant.Filled" DisableElevation="true" OnClick="@(()=>form.ResetValidation())">Reset Validation</MudButton>
             </MudPaper> *@
-            <button type="submit" class="btn btn-primary mt-5" @onclick="UpdateProfile">Actualizar perfil</button>    
+            <MudButton @onclick="UpdateProfile" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto mt-5 d-flex justify-center">Actualizar perfil</MudButton> 
         </MudItem>
-        
-    @* <MudItem xs="12" sm="5">
-            <MudPaper Class="pa-4 mud-height-full">
-                <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
-                    @foreach (var error in errors)
-                    {
-                        <MudText Color="@Color.Error">@error</MudText>
-                    }
-            </MudPaper>
-        </MudItem> *@
     </MudGrid>
-
 </div>
 
 @code {
@@ -112,6 +103,13 @@
         if (pwField1.Value != arg)
             return "Passwords don't match";
         return null;
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        context.Validate();
+        StateHasChanged();
     }
 
 }

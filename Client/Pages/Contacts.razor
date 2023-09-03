@@ -46,11 +46,7 @@
 @code {
 
     private string _filter = string.Empty;
-    private bool _selectChat = false;
-    private string _activeClass = string.Empty;
-
     private List<IContactVM> _contactsList = new();
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,9 +59,12 @@
             {
                 _contactsList.Add(item);
                 this.StateHasChanged();          
-            }  
+            }
         }
-           
+        else
+        {
+            NavigationManager.NavigateTo("/", true);
+        }          
     }
     
 

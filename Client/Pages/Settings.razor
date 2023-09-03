@@ -24,10 +24,5 @@
 </div>
 
 @code {
-    public bool AlarmOn { get; set; }
-
-    public string ToggleIcon { get => AlarmOn ? "Icons.Material.Filled.ToggleOff" : "@Icons.Material.Filled.ToggleOn";  } 
-    private WeatherForecast[]? forecasts;
-
     protected override async Task OnInitializedAsync() => await _settings.GetSettings();
 }

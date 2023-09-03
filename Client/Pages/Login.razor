@@ -40,7 +40,6 @@
 
     [CascadingParameter]
     public Task<AuthenticationState>? Authentication { get; set; }
-    bool success;
     private bool _isShow;
     private InputType PasswordInput = InputType.Password;
     private string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
@@ -74,7 +73,6 @@
     }
     private async Task OnValidSubmit(EditContext context)
     {
-        success = true;
         await LoginUser();
         StateHasChanged();
     }

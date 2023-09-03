@@ -15,7 +15,7 @@ public class UserProfile : Profile
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Logins.First(l => l.UserId.Equals(src.UserId)).UserName))
             .ForMember(dest => 
                 dest.LastName, opt => opt.MapFrom(src => 
-                src.LastName!.Split().Count() > 1 ? src.LastName.Split()[0] : src.LastName.Split()[1]))
+                src.LastName!.Split().Count() > 1 ? src.LastName.Split()[0] : src.LastName))
             .ForMember(dest => 
                 dest.SecondLastName, opt => opt.MapFrom(src => 
                 src.LastName!.Split().Count() > 1 ? src.LastName!.Split()[1] : null))

@@ -65,10 +65,10 @@ public partial class MessageChat
     public async Task Send()
     {
         Messages message = new Messages();
-        message.ToUserId = Contact!.ContactId;
+        message.ToUserId = Contact!.UserId;
         message.FromUserId = MessagingProfile!.UserId;
         message.MessageText = MessageText;
-        await _hubConnection!.SendAsync("SendMessageAsync",message);
+        await _hubConnection!.SendAsync("SendMessageToUserAsync",message);
         MessageText = string.Empty;
     }
 }

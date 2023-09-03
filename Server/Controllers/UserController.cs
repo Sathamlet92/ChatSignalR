@@ -38,6 +38,7 @@ public class UserController : ControllerBase
             {
                 var claims = new[] 
                 {
+                    new Claim(ClaimTypes.NameIdentifier, loggedUserIn.User.UserId.ToString()),
                     new Claim(ClaimTypes.Name, loggedUserIn.Login.UserName),
                     new Claim(ClaimTypes.Email, loggedUserIn.Login.EmailAddres)
                 };
@@ -63,12 +64,12 @@ public class UserController : ControllerBase
         {
             using (var context = await _factoryContext.CreateDbContextAsync())
             {
-                var currentUser = await context.Logins!
+                var currentUser1 = await context.Logins!
                     .Include(l => l.User)
-                    .Where(l => l.EmailAddres.Equals(User.FindFirstValue(ClaimTypes.Email)) || l.UserName.Equals(ClaimTypes.Name))
+                    .Where(l => l.EmailAddres.Equals(User.FindFirstValue(ClaimTypes.Email)) || l.UserName.Equals(User.FindFirstValue(ClaimTypes.Name)))
                     .Select(l => l.User)
                     .ProjectTo<UserDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
-                return ResponseOut<UserDto>.CreateResponse(true, "Recuperado satisfactoriamente", currentUser);
+                return ResponseOut<UserDto>.CreateResponse(true, "Recuperado satisfactoriamente", currentUser1);
             }
         }
         return ResponseOut<UserDto>.CreateResponse(false, "Sin usuario autenticado", null);
@@ -87,7 +88,7 @@ public class UserController : ControllerBase
     {
         using (var context = await _factoryContext.CreateDbContextAsync())
         {
-            return await context.Contacts!
+            var contacts = await context.Contacts!
                 .Where(c => c.PrincipalUserId.Equals(idUser))
                     .Include(c => c.ContactUser)
                         .ThenInclude(u => u.Phones)
@@ -96,7 +97,8 @@ public class UserController : ControllerBase
                     .Include(c => c.ContactUser)
                         .ThenInclude(u => u.Logins)
                 .ProjectTo<ContactDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();            
+                .ToListAsync();
+            return contacts;       
         }            
     }
 

@@ -8,4 +8,10 @@ public class ChatHub : Hub
     {
         await Clients.All.SendAsync("ReceiveMessage", message);
     }
+
+    public Task SendMessageToUserAsync(Messages message)
+    {
+        var users = new string[]{message.ToUserId!, message.FromUserId! };
+        return Clients.Users(users).SendAsync("ReceiveMessage", message);
+    }
 }

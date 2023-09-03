@@ -5,6 +5,7 @@ namespace BlazingChat.Shared.Models.DTOs;
 public class ContactDto
 {
     public long ContactId { get; set; }
+    public long UserId { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string? SecondName { get; set; }
     public string LastName { get; set; } = string.Empty;

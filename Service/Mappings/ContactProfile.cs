@@ -44,7 +44,9 @@ public class ContactProfile : Profile
             .ForMember(vm => vm.LastName, 
                        opt => opt.MapFrom(dto => $"{dto.LastName} {dto.LastSecondName}"))
             .ForMember(vm => vm.UrlImage, 
-                        opt => opt.MapFrom(src => src.UrlImage));
+                        opt => opt.MapFrom(src => src.UrlImage))
+            .ForMember(vm => vm.UserId, 
+                        opt => opt.MapFrom(src => src.UserId));
         
         CreateMap<Contact, ContactDto>().
             ForMember(dest => dest.Phones, 
@@ -61,7 +63,8 @@ public class ContactProfile : Profile
                        opt => opt.MapFrom(src => src.ContactLastName!.Split().Length > 1 ? src.ContactLastName.Split()[1] : null)).
             ForMember(dest => dest.UrlImage, 
                        opt => opt.MapFrom(src => src.ContactUser.ProfilePictureUrl))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.ContactUser.Logins.First().UserName));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.ContactUser.Logins.First().UserName))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.ContactUser.UserId));
         
         CreateMap<IContactVM, MessagingContactVM>()
             .ForMember(dest => 
@@ -76,6 +79,9 @@ public class ContactProfile : Profile
             .ForMember(dest => 
                 dest.ContactId, opt => opt.MapFrom(
                 src => Convert.ToString(src.ContactId)))
+            .ForMember(dest => 
+                dest.UserId, opt => opt.MapFrom(
+                src => Convert.ToString(src.UserId)))
             .ForMember(dest => 
                 dest.UserName, opt => opt.MapFrom(
                 src => src.UserName));

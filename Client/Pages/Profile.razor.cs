@@ -117,6 +117,8 @@ public partial class Profile
         }
         ProfileVM!.UrlImageProfile = _previewImage ?? ProfileVM.UrlImageProfile;
         await ProfileVM.UpdateProfile();
+        var jsonSerializer = JsonConvert.SerializeObject(ProfileVM);
+        await JSInterop!.InvokeVoidAsync("MyLib.saveProfileSession", new{Key = "profile", Value = jsonSerializer});
         _image = null;
         await _inputRef!.ResetAsync();
         StateHasChanged();

@@ -38,3 +38,7 @@ export const getProfileSession = (key) => {
   return sessionStorage.getItem(key);
 }
 
+export const removeProfileSession = (key) => {
+  sessionStorage.removeItem(key); 
+}
+
