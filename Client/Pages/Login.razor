@@ -26,7 +26,7 @@
             <MudCard>
                 <MudCardContent>
                     <MudTextField Label="username/email" @bind-Value="_loginVM.User"/>
-                    <MudTextField Label="password" @bind-Value="_loginVM.Password"/>
+                    <MudTextField InputType="@PasswordInput" Label="password" @bind-Value="_loginVM.Password" Adornment="Adornment.End" OnAdornmentClick="ShowHide" AdornmentIcon="@PasswordInputIcon" AdornmentAriaLabel="Mostrar contraseña"/>
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton @onclick="LoginUser" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info" Class="ml-auto">Iniciar sesión</MudButton>
@@ -40,6 +40,9 @@
 
     [CascadingParameter]
     public Task<AuthenticationState>? Authentication { get; set; }
+    private bool _isShow;
+    private InputType PasswordInput = InputType.Password;
+    private string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,7 +55,7 @@
         }
     }
 
-    bool success;
+    
     private async Task LoginUser()
     {
         var success = await _loginVM.LoginUser();
@@ -70,9 +73,24 @@
     }
     private async Task OnValidSubmit(EditContext context)
     {
-        success = true;
         await LoginUser();
         StateHasChanged();
+    }
+
+    private void ShowHide()
+    {
+        if(_isShow)
+        {
+            _isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else 
+        {
+            _isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
     }
 }
 

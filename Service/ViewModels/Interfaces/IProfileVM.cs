@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BlazingChat.Shared.Models.DTOs;
 
 namespace BlazingChat.Service.ViewsModels;
 public interface IProfileVM
@@ -11,15 +12,13 @@ public interface IProfileVM
     public string LastName { get; set; }
     public string? SecondLastName { get; set; }
     [Required]
-    public string EmailAddress { get; set; }
+    public List<EmailDto> Emails { get; set; }
     [Required]
-    public string Phone { get; set; }
+    public List<PhoneDto> Phones { get; set; }
     public string? Message { get; set; }
     public List<AreaCodeVM>? AreaCodes { get; set; }
-
     public string? UrlImageProfile { get; set; }
-
-    public Task UpdateProfile(IProfileVM model);
+    public Task UpdateProfile();
     public Task GetProfile(long userId);
     public IAsyncEnumerable<string> GetAreaCodes();
 }

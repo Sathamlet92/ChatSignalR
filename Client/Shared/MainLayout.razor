@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager _navigation
 @inject HttpClient _client
+@inject IJSRuntime JSRuntime 
 
 <MudThemeProvider/>
 <MudDialogProvider/>
@@ -47,6 +48,8 @@
 {
     private async Task LogoutUser()
     {
+        await JSRuntime.InvokeVoidAsync("MyLib.removeProfileSession", "profile");
+        await JSRuntime.InvokeVoidAsync("MyLib.removeProfileSession", "areaCodes");
         await _client.GetAsync("api/user/logoutuser");
         _navigation.NavigateTo("/", true);
     }

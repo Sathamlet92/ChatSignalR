@@ -1,0 +1,26 @@
+﻿@page "/chat/{IdContact:long}"
+@page "/chat"
+<h3>Mensajes @IdContact</h3>
+<section class="container h-100" style="background-color: #eee;">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+                <h5 class="font-weight-bold mb-3 text-center text-lg-start">Member</h5>
+                @foreach (var contact in _contactList!)
+                {
+                    <CardProfile SelectContact="GetId" Contact="contact"/>                    
+                }                
+            </div>
+            <div class="col-md-6 col-lg-7 col-xl-8">
+                @if(IdContact > 0)
+                {
+                    <MessageChat MessagingProfile="@MessagingProfile" Contact="@_contact"/>                                 
+                }
+                else
+                {
+                    <p>Selecciona un chat para comenzar</p>
+                }       
+            </div>            
+        </div>
+    </div>
+</section>

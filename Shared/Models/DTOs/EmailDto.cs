@@ -6,4 +6,5 @@ public class EmailDto
     [Required, EmailAddress]
     public string EmailAddress { get; set; } = null!;
     public bool? HasPrincipal { get; set; } 
+    public long EmailId { get; set; }
 }

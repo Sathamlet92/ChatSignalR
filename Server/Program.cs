@@ -5,6 +5,8 @@ using BlazingChat.Service.Mappings;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.ResponseCompression;
+using BlazingChat.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,15 @@ builder.WebHost.ConfigureKestrel(opt =>
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json");
 builder.Services.AddControllersWithViews().AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR(opt => 
+{
+    opt.MaximumReceiveMessageSize = builder.Configuration.GetValue<long>("Kestrel:Limits:MaxRequestBodySize");
+});
+
+builder.Services.AddResponseCompression(opt => 
+{
+    opt.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]{"application/octet-stream"});
+});
 builder.Services.AddSwaggerGen(opt => 
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -50,6 +61,7 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -63,6 +75,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error");
+    app.UseResponseCompression();
 }
 
 app.UseBlazorFrameworkFiles();
@@ -74,6 +87,7 @@ app.UseAuthentication();
 
 app.MapRazorPages();
 app.MapControllers();
+app.MapHub<ChatHub>("/chathub");
 app.MapFallbackToFile("index.html");
 
 app.Run();

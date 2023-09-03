@@ -1,8 +1,12 @@
-﻿@using BlazingChat.Components.Chat
+﻿@using BlazingChat.Client.Components
 @using BlazingChat.Components.Redirect
+@using System.Reflection
+@inject Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader AssemblyLoader
 
 <CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly" AdditionalAssemblies="new []{typeof(Chat).Assembly}">
+    <Router AppAssembly="@typeof(App).Assembly" 
+        AdditionalAssemblies="LazyLoadAssemblies"
+        >
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
@@ -18,3 +22,7 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private List<Assembly> LazyLoadAssemblies = new(new []{ typeof(LoginRedirect).Assembly });
+}
